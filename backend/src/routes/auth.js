@@ -42,7 +42,7 @@ const getTimeAndDate = () => {
 // Sign Up Route (Step 1: Send OTP)
 authRouter.post('/signup', async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, role} = req.body;
 
         if (!name || !email || !password) {
             return res.status(400).json({ message: 'Name, email and password are required' });
@@ -62,7 +62,7 @@ authRouter.post('/signup', async (req, res) => {
         const expiresAt = Date.now() + 5 * 60 * 1000; 
 
         // Store email mapping to otp and user details
-        otpMap.set(email, { otp, expiresAt, name, password });
+        otpMap.set(email, { otp, expiresAt, name, password, role: role === 'HR' ? 'HR' : 'EMPLOYEE' });
 
         const options = {
             from: '"SyncWork" <master.trainer049@gmail.com>', // Ensure this matches your .env EMAIL_USER
@@ -114,7 +114,7 @@ authRouter.post('/verify-otp', async (req, res) => {
                 passwordHash,
                 displayName: storedData.name,
                 employeeId,
-                role: 'EMPLOYEE', // Default role on signup
+                role: storedData.role || 'EMPLOYEE', // Use the role they selected during signup
                 status: 'ACTIVE'
             }
         });
