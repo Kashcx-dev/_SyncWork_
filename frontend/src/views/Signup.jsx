@@ -15,6 +15,7 @@ export default function Signup() {
     const [otp, setOtp] = useState('');
     
     const [otpSent, setOtpSent] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [errors, setErrors] = useState({});
 
     const validateSignUp = () => {
@@ -39,7 +40,9 @@ export default function Signup() {
 
         if (!otpSent) {
             if (!validateSignUp()) return;
+            setIsLoading(true);
             const res = await handleSignUp({ name, email, password, role, department });
+            setIsLoading(false);
             if (res.success) {
                 setOtpSent(true);
             } else {
@@ -47,7 +50,9 @@ export default function Signup() {
             }
         } else {
             if (!validateOtp()) return;
+            setIsLoading(true);
             const res = await handleVerifyOtp(email, otp);
+            setIsLoading(false);
             if (res.success) {
                 navigate('/');
             } else {
@@ -168,9 +173,10 @@ export default function Signup() {
 
                     <button
                         type="submit"
-                        className="w-full py-3 bg-black hover:bg-neutral-800 dark:bg-white dark:hover:bg-neutral-200 text-white dark:text-black font-semibold rounded-xl text-sm transition-all shadow-md cursor-pointer"
+                        disabled={isLoading}
+                        className={`w-full py-3 bg-black hover:bg-neutral-800 dark:bg-white dark:hover:bg-neutral-200 text-white dark:text-black font-semibold rounded-xl text-sm transition-all shadow-md ${isLoading ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
                     >
-                        {otpSent ? "Verify & Login" : "Sign Up"}
+                        {isLoading ? "Processing..." : (otpSent ? "Verify & Login" : "Sign Up")}
                     </button>
                 </form>
 
