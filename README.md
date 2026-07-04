@@ -129,7 +129,7 @@ sequenceDiagram
    npm install
    npm run dev
    ```
-
+**NOTE: DUMMY PROFILES ARE SHARED IN CONTEXT FOR BEST "MASS ACTIVITY" TESTING**
 4. Open `http://localhost:5173` in your browser.
 
 ---
