@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { AppContext } from '../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, User, CalendarRange, MailCheck, Coins, Users, CalendarCheck2 } from 'lucide-react';
+import { LayoutDashboard, User, CalendarRange, MailCheck, Coins, Users, CalendarCheck2, MessageSquare } from 'lucide-react';
 
 export default function Sidebar() {
     const { currentUser } = useContext(AppContext);
@@ -17,14 +17,16 @@ export default function Sidebar() {
             { id: 'admin-employees', label: 'Employees', icon: Users },
             { id: 'admin-attendance', label: 'Attendance Log', icon: CalendarCheck2 },
             { id: 'admin-leaves', label: 'Leave Approvals', icon: MailCheck },
-            { id: 'admin-payroll', label: 'Payroll Management', icon: Coins }
+            { id: 'admin-payroll', label: 'Payroll Management', icon: Coins },
+            { id: 'chat', label: 'Secure Chat', icon: MessageSquare }
           ]
         : [
             { id: 'dashboard', label: 'My Dashboard', icon: LayoutDashboard },
             { id: 'profile', label: 'My Profile', icon: User },
             { id: 'attendance', label: 'Attendance', icon: CalendarRange },
             { id: 'leave', label: 'Time-off requests', icon: MailCheck },
-            { id: 'payroll', label: 'My Salary', icon: Coins }
+            { id: 'payroll', label: 'My Salary', icon: Coins },
+            { id: 'chat', label: 'Secure Chat', icon: MessageSquare }
           ];
 
     return (

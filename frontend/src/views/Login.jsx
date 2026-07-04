@@ -3,7 +3,7 @@ import { AppContext } from '../context/AppContext';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function Login() {
-    const { handleLogin, handleVerifySigninOtp } = useContext(AppContext);
+    const { handleLogin, handleVerifySigninOtp, handleLoginCryptoSetup } = useContext(AppContext);
     const navigate = useNavigate();
 
     const [creds, setCreds] = useState('');
@@ -41,6 +41,7 @@ export default function Login() {
                     setOtpSent(true);
                     setResolvedEmail(res.email);
                 } else {
+                    await handleLoginCryptoSetup(password, sessionStorage.getItem("hrms_react_token"));
                     navigate('/');
                 }
             } else {
@@ -50,6 +51,7 @@ export default function Login() {
             if (!validateOtp()) return;
             const res = await handleVerifySigninOtp(resolvedEmail, otp);
             if (res.success) {
+                await handleLoginCryptoSetup(password, sessionStorage.getItem("hrms_react_token"));
                 navigate('/');
             } else {
                 setErrors({ global: res.error });

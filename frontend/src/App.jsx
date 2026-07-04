@@ -16,6 +16,7 @@ import AdminEmployees from "./views/AdminEmployees";
 import AdminAttendance from "./views/AdminAttendance";
 import AdminLeaves from "./views/AdminLeaves";
 import AdminPayroll from "./views/AdminPayroll";
+import Chat from "./views/Chat";
 
 export default function App() {
 	const { currentUser } = useContext(AppContext);
@@ -56,6 +57,7 @@ export default function App() {
 							/>
 							<Route path="/admin-leaves" element={<AdminLeaves />} />
 							<Route path="/admin-payroll" element={<AdminPayroll />} />
+							<Route path="/chat" element={<Chat />} />
 							<Route path="*" element={<Navigate to="/" replace />} />
 						</Routes>
 					</main>

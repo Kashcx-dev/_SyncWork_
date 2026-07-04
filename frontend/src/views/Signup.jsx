@@ -3,7 +3,7 @@ import { AppContext } from '../context/AppContext';
 import { Link, useNavigate } from 'react-router-dom';
 
 export default function Signup() {
-    const { handleSignUp, handleVerifyOtp } = useContext(AppContext);
+    const { handleSignUp, handleVerifyOtp, handleFirstTimeCryptoSetup } = useContext(AppContext);
     const navigate = useNavigate();
 
     // Input states
@@ -54,6 +54,7 @@ export default function Signup() {
             const res = await handleVerifyOtp(email, otp);
             setIsLoading(false);
             if (res.success) {
+                await handleFirstTimeCryptoSetup(password, sessionStorage.getItem("hrms_react_token"));
                 navigate('/');
             } else {
                 setErrors({ global: res.error });

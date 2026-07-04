@@ -1,4 +1,6 @@
 import React, { createContext, useState, useEffect } from 'react';
+import { initCryptoEngine, generateRandomPrivateKey, getPublicKey, encryptPrivateKeyForVault, decryptPrivateKeyFromVault } from '../utils/crypto';
+import { socket } from '../socket';
 
 export const AppContext = createContext();
 
@@ -103,6 +105,75 @@ export const AppProvider = ({ children }) => {
 
     const [profile, setProfile] = useState(null);
     const [dashboardData, setDashboardData] = useState(null);
+    const [myPrivateKey, setMyPrivateKey] = useState(null);
+
+    const handleFirstTimeCryptoSetup = async (password, tokenToUse) => {
+        try {
+            const token = tokenToUse || sessionStorage.getItem("hrms_react_token");
+            if (!token) return null;
+
+            const privateKey = generateRandomPrivateKey();
+            const privateKeyStr = privateKey.toString();
+            const publicKeyStr = getPublicKey(privateKey);
+            const vault = await encryptPrivateKeyForVault(privateKeyStr, password);
+
+            await fetch('http://localhost:3000/api/chat/vault', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    publicKey: publicKeyStr,
+                    encryptedPrivateKey: vault.encrypted_private_key,
+                    keySalt: vault.key_salt,
+                    keyIv: vault.key_iv
+                })
+            });
+
+            setMyPrivateKey(privateKey);
+            return privateKey;
+        } catch (err) {
+            console.error("Crypto setup error:", err);
+            return null;
+        }
+    };
+
+    const handleLoginCryptoSetup = async (password, tokenToUse) => {
+        try {
+            const token = tokenToUse || sessionStorage.getItem("hrms_react_token");
+            if (!token) return null;
+
+            const res = await fetch('http://localhost:3000/api/chat/vault', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+
+            if (res.ok && data.hasVault) {
+                const privateKeyStr = await decryptPrivateKeyFromVault(data.vault, password);
+                const privateKeyBigInt = BigInt(privateKeyStr);
+                setMyPrivateKey(privateKeyBigInt);
+                return privateKeyBigInt;
+            } else {
+                return await handleFirstTimeCryptoSetup(password, token);
+            }
+        } catch (err) {
+            console.error("Crypto vault recovery error:", err);
+            return null;
+        }
+    };
+
+    useEffect(() => {
+        const setupChat = async () => {
+            const isWasmLoaded = await initCryptoEngine();
+            const token = sessionStorage.getItem("hrms_react_token");
+            if (isWasmLoaded && token) {
+                socket.auth = { token };
+                socket.connect();
+            }
+        };
+        setupChat();
+    }, [currentUser]);
 
     const fetchEmployees = async (tokenValue) => {
         try {
@@ -179,7 +250,6 @@ export const AppProvider = ({ children }) => {
         const existingToken = sessionStorage.getItem("hrms_react_token");
         if (existingToken) {
             fetchProfileAndDashboard(existingToken);
-            fetchEmployees(existingToken);
             fetchLeaves(existingToken);
         }
     }, []);
@@ -302,9 +372,11 @@ export const AppProvider = ({ children }) => {
 
     const handleLogout = () => {
         setCurrentUser(null);
+        setMyPrivateKey(null);
         sessionStorage.removeItem("hrms_react_active_user");
         sessionStorage.removeItem("hrms_react_token");
         setActiveView("dashboard");
+        socket.disconnect();
     };
 
     const handleSignUp = async (newEmp) => {
@@ -566,7 +638,10 @@ export const AppProvider = ({ children }) => {
             clockOut,
             applyLeave,
             processLeaveAction,
-            updateSalaryStructure
+            updateSalaryStructure,
+            myPrivateKey,
+            handleLoginCryptoSetup,
+            handleFirstTimeCryptoSetup
         }}>
             {children}
         </AppContext.Provider>
