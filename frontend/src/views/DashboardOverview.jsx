@@ -77,7 +77,7 @@ export default function DashboardOverview() {
 						<h3 className="font-bold text-slate-800 dark:text-white text-base">
 							Leave Approvals
 						</h3>
-						<p className="text-xs text-neutral-800 dark:text-white font-bold underline mt-1">
+						<p className="text-xs text-slate-400 dark:text-neutral-500 mt-1">
 							{pendingLeaves} applications require action
 						</p>
 					</div>

@@ -70,7 +70,7 @@ export default function Login() {
                 </div>
 
                 {errors.global && (
-                    <div className="mb-4 p-4 text-sm bg-rose-50 text-rose-800 border border-rose-100 rounded-2xl dark:bg-neutral-950 dark:text-white dark:border-neutral-800">
+                    <div className="mb-4 p-4 text-sm bg-rose-50 text-rose-800 border border-rose-100 rounded-2xl dark:bg-neutral-950 dark:text-rose-400 dark:border-neutral-800">
                         {errors.global}
                     </div>
                 )}
@@ -89,7 +89,7 @@ export default function Login() {
                                     placeholder="name@company.com or EMP-123456"
                                     className="w-full px-4 py-3 border border-slate-200 dark:border-neutral-800 rounded-xl bg-slate-50 dark:bg-neutral-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-black dark:focus:border-white transition-all"
                                 />
-                                {errors.creds && <p className="mt-1 text-xs text-rose-600 dark:text-white">{errors.creds}</p>}
+                                {errors.creds && <p className="mt-1 text-xs text-rose-600 dark:text-rose-400">{errors.creds}</p>}
                             </div>
 
                             <div>
@@ -103,7 +103,7 @@ export default function Login() {
                                     placeholder="••••••••"
                                     className="w-full px-4 py-3 border border-slate-200 dark:border-neutral-800 rounded-xl bg-slate-50 dark:bg-neutral-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-black dark:focus:border-white transition-all"
                                 />
-                                {errors.password && <p className="mt-1 text-xs text-rose-600 dark:text-white">{errors.password}</p>}
+                                {errors.password && <p className="mt-1 text-xs text-rose-600 dark:text-rose-400">{errors.password}</p>}
                             </div>
                         </>
                     ) : (
@@ -118,7 +118,7 @@ export default function Login() {
                                 placeholder="123456"
                                 className="w-full px-4 py-3 border border-slate-200 dark:border-neutral-800 rounded-xl bg-slate-50 dark:bg-neutral-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-black dark:focus:border-white transition-all"
                             />
-                            {errors.otp && <p className="mt-1 text-xs text-rose-600 dark:text-white">{errors.otp}</p>}
+                            {errors.otp && <p className="mt-1 text-xs text-rose-600 dark:text-rose-400">{errors.otp}</p>}
                         </div>
                     )}
 
