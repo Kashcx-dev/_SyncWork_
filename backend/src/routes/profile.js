@@ -46,9 +46,13 @@ profileRouter.get('/', async (req, res) => {
             email: user.email,
             displayName: user.displayName,
             role: user.role,
-            // Fallback to a generated avatar if they haven't uploaded one
             avatar: user.profile?.profilePictureUrl || `https://ui-avatars.com/api/?name=${user.displayName}&background=random`,
-            reportingTo: reportText
+            reportingTo: reportText,
+            department: user.profile?.department,
+            jobTitle: user.profile?.designation,
+            salary: user.profile?.baseSalary ? `$${user.profile.baseSalary}/month` : undefined,
+            phone: user.profile?.phone,
+            address: user.profile?.address
         };
 
         return res.status(200).json({ success: true, profile: profileData });
