@@ -18,6 +18,9 @@ import {
 	Paperclip,
 } from "lucide-react";
 
+const BACKEND_HOST = import.meta.env.VITE_BACKEND_HOST;
+import noProfilePic from "../assets/no-profile-pic.png";
+
 export default function Chat() {
 	const { currentUser, myPrivateKey, handleLoginCryptoSetup } =
 		useContext(AppContext);
@@ -136,7 +139,7 @@ export default function Chat() {
 		try {
 			const token = sessionStorage.getItem("hrms_react_token");
 			const res = await fetch(
-				"http://localhost:3000/api/chat/conversations",
+				`${BACKEND_HOST}/api/chat/conversations`,
 				{
 					headers: { Authorization: `Bearer ${token}` },
 				},
@@ -182,7 +185,7 @@ export default function Chat() {
 		try {
 			const token = sessionStorage.getItem("hrms_react_token");
 			const res = await fetch(
-				`http://localhost:3000/api/chat/users?search=${encodeURIComponent(searchTerm)}`,
+				`${BACKEND_HOST}/api/chat/users?search=${encodeURIComponent(searchTerm)}`,
 				{
 					headers: { Authorization: `Bearer ${token}` },
 				},
@@ -200,7 +203,7 @@ export default function Chat() {
 		try {
 			const token = sessionStorage.getItem("hrms_react_token");
 			const res = await fetch(
-				`http://localhost:3000/api/chat/history/${convoId}`,
+				`${BACKEND_HOST}/api/chat/history/${convoId}`,
 				{
 					headers: { Authorization: `Bearer ${token}` },
 				},
@@ -224,7 +227,7 @@ export default function Chat() {
 	const startDirectChat = async (targetUser) => {
 		try {
 			const token = sessionStorage.getItem("hrms_react_token");
-			const res = await fetch("http://localhost:3000/api/chat/direct", {
+			const res = await fetch(`${BACKEND_HOST}/api/chat/direct`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -266,7 +269,7 @@ export default function Chat() {
 			const encryptedBlob = await encryptMessage(inputText.trim(), secret);
 
 			const token = sessionStorage.getItem("hrms_react_token");
-			const res = await fetch("http://localhost:3000/api/chat/message", {
+			const res = await fetch(`${BACKEND_HOST}/api/chat/message`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -311,7 +314,7 @@ export default function Chat() {
 		try {
 			const token = sessionStorage.getItem("hrms_react_token");
 			const uploadRes = await fetch(
-				"http://localhost:3000/api/chat/upload",
+				`${BACKEND_HOST}/api/chat/upload`,
 				{
 					method: "POST",
 					headers: {
@@ -336,7 +339,7 @@ export default function Chat() {
 				);
 
 				const msgRes = await fetch(
-					"http://localhost:3000/api/chat/message",
+					`${BACKEND_HOST}/api/chat/message`,
 					{
 						method: "POST",
 						headers: {
@@ -379,7 +382,7 @@ export default function Chat() {
 
 		try {
 			const token = sessionStorage.getItem("hrms_react_token");
-			await fetch("http://localhost:3000/api/chat/read", {
+			await fetch(`${BACKEND_HOST}/api/chat/read`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",
@@ -425,7 +428,7 @@ export default function Chat() {
 			const data = JSON.parse(msg.decryptedText);
 			if (data._attachment) {
 				const isImage = /\.(jpeg|jpg|gif|png|webp)$/i.test(data.path);
-				const fileUrl = `http://localhost:3000${data.path}`;
+				const fileUrl = `${BACKEND_HOST}${data.path}`;
 
 				if (isImage) {
 					return (
@@ -571,7 +574,7 @@ export default function Chat() {
 										<img
 											src={
 												user.profile?.profilePictureUrl ||
-												`https://ui-avatars.com/api/?name=${user.displayName}&background=random`
+												noProfilePic
 											}
 											className="w-10 h-10 rounded-full object-cover"
 											alt="Avatar"
@@ -618,7 +621,7 @@ export default function Chat() {
 											<img
 												src={
 													convo.otherUser.profilePicture ||
-													`https://ui-avatars.com/api/?name=${convo.otherUser.displayName}&background=random`
+													noProfilePic
 												}
 												className="w-10 h-10 rounded-full object-cover"
 												alt="Avatar"
@@ -673,7 +676,7 @@ export default function Chat() {
 							<img
 								src={
 									activeConvo.otherUser.profilePicture ||
-									`https://ui-avatars.com/api/?name=${activeConvo.otherUser.displayName}&background=random`
+									noProfilePic
 								}
 								className="w-10 h-10 rounded-full object-cover"
 								alt="Avatar"

@@ -1,6 +1,9 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { initCryptoEngine, generateRandomPrivateKey, getPublicKey, encryptPrivateKeyForVault, decryptPrivateKeyFromVault } from '../utils/crypto';
 import { socket } from '../socket';
+import noProfilePic from '../assets/no-profile-pic.png';
+
+const BACKEND_HOST = import.meta.env.VITE_BACKEND_HOST;
 
 export const AppContext = createContext();
 
@@ -11,7 +14,7 @@ const INITIAL_EMPLOYEES = [
         email: "hr@company.com",
         role: "HR",
         password: "Password123!",
-        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=120",
+        avatar: noProfilePic,
         phone: "+1 (555) 019-2834",
         address: "742 Evergreen Terrace, Springfield",
         title: "HR Director",
@@ -28,7 +31,7 @@ const INITIAL_EMPLOYEES = [
         email: "david@company.com",
         role: "Employee",
         password: "Password123!",
-        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=120",
+        avatar: noProfilePic,
         phone: "+1 (555) 014-9988",
         address: "128 Baker Street, London",
         title: "Software Engineer",
@@ -45,7 +48,7 @@ const INITIAL_EMPLOYEES = [
         email: "elena@company.com",
         role: "Employee",
         password: "Password123!",
-        avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=120",
+        avatar: noProfilePic,
         phone: "+1 (555) 017-3344",
         address: "42 Wallaby Way, Sydney",
         title: "UX Designer",
@@ -117,7 +120,7 @@ export const AppProvider = ({ children }) => {
             const publicKeyStr = getPublicKey(privateKey);
             const vault = await encryptPrivateKeyForVault(privateKeyStr, password);
 
-            await fetch('http://localhost:3000/api/chat/vault', {
+            await fetch(`${BACKEND_HOST}/api/chat/vault`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -144,7 +147,7 @@ export const AppProvider = ({ children }) => {
             const token = tokenToUse || sessionStorage.getItem("hrms_react_token");
             if (!token) return null;
 
-            const res = await fetch('http://localhost:3000/api/chat/vault', {
+            const res = await fetch(`${BACKEND_HOST}/api/chat/vault`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
@@ -180,7 +183,7 @@ export const AppProvider = ({ children }) => {
             const tokenToUse = tokenValue || sessionStorage.getItem("hrms_react_token");
             if (!tokenToUse) return;
 
-            const res = await fetch("http://localhost:3000/api/employees", {
+            const res = await fetch(`${BACKEND_HOST}/api/employees`, {
                 headers: {
                     "Authorization": `Bearer ${tokenToUse}`
                 }
@@ -199,7 +202,7 @@ export const AppProvider = ({ children }) => {
             const tokenToUse = tokenValue || sessionStorage.getItem("hrms_react_token");
             if (!tokenToUse) return;
 
-            const res = await fetch("http://localhost:3000/api/leaves", {
+            const res = await fetch(`${BACKEND_HOST}/api/leaves`, {
                 headers: {
                     "Authorization": `Bearer ${tokenToUse}`
                 }
@@ -218,7 +221,7 @@ export const AppProvider = ({ children }) => {
             const tokenToUse = tokenValue || sessionStorage.getItem("hrms_react_token");
             if (!tokenToUse) return;
 
-            const profileRes = await fetch("http://localhost:3000/api/profile", {
+            const profileRes = await fetch(`${BACKEND_HOST}/api/profile`, {
                 headers: {
                     "Authorization": `Bearer ${tokenToUse}`
                 }
@@ -232,7 +235,7 @@ export const AppProvider = ({ children }) => {
                 await fetchLeaves(tokenToUse);
             }
 
-            const dashRes = await fetch("http://localhost:3000/api/dashboard", {
+            const dashRes = await fetch(`${BACKEND_HOST}/api/dashboard`, {
                 headers: {
                     "Authorization": `Bearer ${tokenToUse}`
                 }
@@ -289,7 +292,7 @@ export const AppProvider = ({ children }) => {
 
     const handleLogin = async (email, password) => {
         try {
-            const res = await fetch("http://localhost:3000/api/auth/signin", {
+            const res = await fetch(`${BACKEND_HOST}/api/auth/signin`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -306,7 +309,7 @@ export const AppProvider = ({ children }) => {
                     name: data.user.displayName,
                     email: email,
                     role: data.user.role === 'HR' || data.user.role === 'ADMIN' ? 'HR' : 'Employee',
-                    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=120",
+                    avatar: noProfilePic,
                     phone: "",
                     address: "",
                     title: data.user.role === 'HR' || data.user.role === 'ADMIN' ? 'HR Officer' : 'Associate',
@@ -332,7 +335,7 @@ export const AppProvider = ({ children }) => {
 
     const handleVerifySigninOtp = async (email, otp) => {
         try {
-            const res = await fetch("http://localhost:3000/api/auth/verify-signin-otp", {
+            const res = await fetch(`${BACKEND_HOST}/api/auth/verify-signin-otp`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -346,7 +349,7 @@ export const AppProvider = ({ children }) => {
                     name: data.user.displayName,
                     email: email,
                     role: data.user.role === 'HR' || data.user.role === 'ADMIN' ? 'HR' : 'Employee',
-                    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=120",
+                    avatar: noProfilePic,
                     phone: "",
                     address: "",
                     title: data.user.role === 'HR' || data.user.role === 'ADMIN' ? 'HR Officer' : 'Associate',
@@ -381,7 +384,7 @@ export const AppProvider = ({ children }) => {
 
     const handleSignUp = async (newEmp) => {
         try {
-            const res = await fetch("http://localhost:3000/api/auth/signup", {
+            const res = await fetch(`${BACKEND_HOST}/api/auth/signup`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -401,7 +404,7 @@ export const AppProvider = ({ children }) => {
 
     const handleVerifyOtp = async (email, otp) => {
         try {
-            const res = await fetch("http://localhost:3000/api/auth/verify-otp", {
+            const res = await fetch(`${BACKEND_HOST}/api/auth/verify-otp`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -415,7 +418,7 @@ export const AppProvider = ({ children }) => {
                     name: data.user.displayName,
                     email: data.user.email,
                     role: data.user.role === 'HR' || data.user.role === 'ADMIN' ? 'HR' : 'Employee',
-                    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=120",
+                    avatar: noProfilePic,
                     phone: "",
                     address: "",
                     title: data.user.role === 'HR' || data.user.role === 'ADMIN' ? 'HR Officer' : 'Associate',
@@ -459,7 +462,7 @@ export const AppProvider = ({ children }) => {
             const token = sessionStorage.getItem("hrms_react_token");
             if (!token) return;
 
-            const res = await fetch(`http://localhost:3000/api/employees/${empId}`, {
+            const res = await fetch(`${BACKEND_HOST}/api/employees/${empId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -523,7 +526,7 @@ export const AppProvider = ({ children }) => {
             const token = sessionStorage.getItem("hrms_react_token");
             if (!token) return;
 
-            const res = await fetch("http://localhost:3000/api/leaves/apply", {
+            const res = await fetch(`${BACKEND_HOST}/api/leaves/apply`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -557,7 +560,7 @@ export const AppProvider = ({ children }) => {
             const token = sessionStorage.getItem("hrms_react_token");
             if (!token) return;
 
-            const res = await fetch(`http://localhost:3000/api/leaves/${leaveId}/status`, {
+            const res = await fetch(`${BACKEND_HOST}/api/leaves/${leaveId}/status`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -587,7 +590,7 @@ export const AppProvider = ({ children }) => {
             const token = sessionStorage.getItem("hrms_react_token");
             if (!token) return;
 
-            const res = await fetch(`http://localhost:3000/api/payroll/${empId}`, {
+            const res = await fetch(`${BACKEND_HOST}/api/payroll/${empId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
