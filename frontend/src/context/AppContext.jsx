@@ -101,6 +101,68 @@ export const AppProvider = ({ children }) => {
         return active ? JSON.parse(active) : null;
     });
 
+    const [profile, setProfile] = useState(null);
+    const [dashboardData, setDashboardData] = useState(null);
+
+    const fetchEmployees = async (tokenValue) => {
+        try {
+            const tokenToUse = tokenValue || sessionStorage.getItem("hrms_react_token");
+            if (!tokenToUse) return;
+
+            const res = await fetch("http://localhost:3000/api/employees", {
+                headers: {
+                    "Authorization": `Bearer ${tokenToUse}`
+                }
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setEmployees(data.employees);
+            }
+        } catch (error) {
+            console.error("Error loading employees list:", error);
+        }
+    };
+
+    const fetchProfileAndDashboard = async (tokenValue) => {
+        try {
+            const tokenToUse = tokenValue || sessionStorage.getItem("hrms_react_token");
+            if (!tokenToUse) return;
+
+            const profileRes = await fetch("http://localhost:3000/api/profile", {
+                headers: {
+                    "Authorization": `Bearer ${tokenToUse}`
+                }
+            });
+            const profileData = await profileRes.json();
+            if (profileRes.ok && profileData.success) {
+                setProfile(profileData.profile);
+                if (profileData.profile.role === 'HR' || profileData.profile.role === 'ADMIN') {
+                    await fetchEmployees(tokenToUse);
+                }
+            }
+
+            const dashRes = await fetch("http://localhost:3000/api/dashboard", {
+                headers: {
+                    "Authorization": `Bearer ${tokenToUse}`
+                }
+            });
+            const dashData = await dashRes.json();
+            if (dashRes.ok) {
+                setDashboardData(dashData.data);
+            }
+        } catch (error) {
+            console.error("Error loading profile or dashboard:", error);
+        }
+    };
+
+    useEffect(() => {
+        const existingToken = sessionStorage.getItem("hrms_react_token");
+        if (existingToken) {
+            fetchProfileAndDashboard(existingToken);
+            fetchEmployees(existingToken);
+        }
+    }, []);
+
     const [activeView, setActiveView] = useState("dashboard");
     const [theme, setTheme] = useState(() => {
         return localStorage.getItem("hrms_react_theme") || "light";
@@ -167,6 +229,7 @@ export const AppProvider = ({ children }) => {
                 setCurrentUser(sessionUser);
                 sessionStorage.setItem("hrms_react_active_user", JSON.stringify(sessionUser));
                 sessionStorage.setItem("hrms_react_token", data.token);
+                await fetchProfileAndDashboard(data.token);
                 return { success: true };
             } else {
                 return { success: false, error: data.message || "Sign in failed" };
@@ -206,6 +269,7 @@ export const AppProvider = ({ children }) => {
                 setCurrentUser(sessionUser);
                 sessionStorage.setItem("hrms_react_active_user", JSON.stringify(sessionUser));
                 sessionStorage.setItem("hrms_react_token", data.token);
+                await fetchProfileAndDashboard(data.token);
                 return { success: true };
             } else {
                 return { success: false, error: data.message || "Verification failed" };
@@ -229,7 +293,7 @@ export const AppProvider = ({ children }) => {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ name: newEmp.name, email: newEmp.email, password: newEmp.password })
+                body: JSON.stringify({ name: newEmp.name, email: newEmp.email, password: newEmp.password, role: newEmp.role, department: newEmp.department })
             });
             const data = await res.json();
             if (res.ok) {
@@ -272,6 +336,7 @@ export const AppProvider = ({ children }) => {
                 setCurrentUser(sessionUser);
                 sessionStorage.setItem("hrms_react_active_user", JSON.stringify(sessionUser));
                 sessionStorage.setItem("hrms_react_token", data.token);
+                await fetchProfileAndDashboard(data.token);
                 return { success: true };
             } else {
                 return { success: false, error: data.message || "Verification failed" };
@@ -296,21 +361,39 @@ export const AppProvider = ({ children }) => {
         });
     };
 
-    const updateEmployeeAdmin = (empId, fields) => {
-        setEmployees(prev => {
-            const updated = prev.map(emp => {
-                if (emp.empId === empId) {
-                    const next = { ...emp, ...fields };
-                    if (currentUser && currentUser.empId === empId) {
-                        setCurrentUser(next);
-                        sessionStorage.setItem("hrms_react_active_user", JSON.stringify(next));
-                    }
-                    return next;
-                }
-                return emp;
+    const updateEmployeeAdmin = async (empId, fields) => {
+        try {
+            const token = sessionStorage.getItem("hrms_react_token");
+            if (!token) return;
+
+            const res = await fetch(`http://localhost:3000/api/employees/${empId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(fields)
             });
-            return updated;
-        });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setEmployees(prev => {
+                    const updated = prev.map(emp => {
+                        if (emp.empId === empId) {
+                            const next = { ...emp, ...fields };
+                            if (currentUser && currentUser.empId === empId) {
+                                                        setCurrentUser(next);
+                                                        sessionStorage.setItem("hrms_react_active_user", JSON.stringify(next));
+                            }
+                            return next;
+                        }
+                        return emp;
+                    });
+                    return updated;
+                });
+            }
+        } catch (error) {
+            console.error("Error updating employee admin details:", error);
+        }
     };
 
     const clockIn = () => {
@@ -417,6 +500,8 @@ export const AppProvider = ({ children }) => {
             attendance,
             leaves,
             currentUser,
+            profile,
+            dashboardData,
             activeView,
             theme,
             toggleTheme,
