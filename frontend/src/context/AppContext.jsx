@@ -123,6 +123,25 @@ export const AppProvider = ({ children }) => {
         }
     };
 
+    const fetchLeaves = async (tokenValue) => {
+        try {
+            const tokenToUse = tokenValue || sessionStorage.getItem("hrms_react_token");
+            if (!tokenToUse) return;
+
+            const res = await fetch("http://localhost:3000/api/leaves", {
+                headers: {
+                    "Authorization": `Bearer ${tokenToUse}`
+                }
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                setLeaves(data.leaves);
+            }
+        } catch (error) {
+            console.error("Error loading leaves list:", error);
+        }
+    };
+
     const fetchProfileAndDashboard = async (tokenValue) => {
         try {
             const tokenToUse = tokenValue || sessionStorage.getItem("hrms_react_token");
@@ -139,6 +158,7 @@ export const AppProvider = ({ children }) => {
                 if (profileData.profile.role === 'HR' || profileData.profile.role === 'ADMIN') {
                     await fetchEmployees(tokenToUse);
                 }
+                await fetchLeaves(tokenToUse);
             }
 
             const dashRes = await fetch("http://localhost:3000/api/dashboard", {
@@ -160,6 +180,7 @@ export const AppProvider = ({ children }) => {
         if (existingToken) {
             fetchProfileAndDashboard(existingToken);
             fetchEmployees(existingToken);
+            fetchLeaves(existingToken);
         }
     }, []);
 
@@ -425,73 +446,101 @@ export const AppProvider = ({ children }) => {
         });
     };
 
-    const applyLeave = (type, startDate, endDate, remarks) => {
-        const newLeave = {
-            id: "L" + Date.now().toString().slice(-4),
-            empId: currentUser.empId,
-            name: currentUser.name,
-            leaveType: type,
-            startDate,
-            endDate,
-            remarks,
-            status: "Pending",
-            adminComment: ""
-        };
+    const applyLeave = async (type, startDate, endDate, remarks) => {
+        try {
+            const token = sessionStorage.getItem("hrms_react_token");
+            if (!token) return;
 
-        setLeaves(prev => [...prev, newLeave]);
+            const res = await fetch("http://localhost:3000/api/leaves/apply", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ leaveType: type, startDate, endDate, remarks })
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                // Ensure the leave is properly formatted for the frontend
+                const newLeave = {
+                    id: data.leave.id,
+                    empId: currentUser.empId,
+                    name: currentUser.name,
+                    leaveType: type,
+                    startDate: data.leave.startDate.split('T')[0],
+                    endDate: data.leave.endDate.split('T')[0],
+                    remarks,
+                    status: "Pending",
+                    adminComment: ""
+                };
+                setLeaves(prev => [newLeave, ...prev]);
+            }
+        } catch (error) {
+            console.error("Error applying leave:", error);
+        }
     };
 
-    const processLeaveAction = (leaveId, status, comment) => {
-        setLeaves(prev => {
-            return prev.map(leave => {
-                if (leave.id === leaveId) {
-                    const nextLeave = { ...leave, status, adminComment: comment || "" };
-                    
-                    // If approved, create daily attendance markers for the leave period
-                    if (status === "Approved") {
-                        const start = new Date(leave.startDate);
-                        const end = new Date(leave.endDate);
-                        const logsToAdd = [];
+    const processLeaveAction = async (leaveId, status, comment) => {
+        try {
+            const token = sessionStorage.getItem("hrms_react_token");
+            if (!token) return;
 
-                        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-                            const dateStr = d.toISOString().split("T")[0];
-                            logsToAdd.push({
-                                date: dateStr,
-                                empId: leave.empId,
-                                checkIn: "",
-                                checkOut: "",
-                                status: "Leave"
-                            });
+            const res = await fetch(`http://localhost:3000/api/leaves/${leaveId}/status`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ status, adminComment: comment })
+            });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                setLeaves(prev => {
+                    return prev.map(leave => {
+                        if (leave.id === leaveId) {
+                            return { ...leave, status, adminComment: comment || "" };
                         }
-
-                        // Add without duplicates
-                        setAttendance(currAttendance => {
-                            const filteredLogs = logsToAdd.filter(
-                                fresh => !currAttendance.some(old => old.date === fresh.date && old.empId === fresh.empId)
-                            );
-                            return [...currAttendance, ...filteredLogs];
-                        });
-                    }
-
-                    return nextLeave;
-                }
-                return leave;
-            });
-        });
+                        return leave;
+                    });
+                });
+            }
+        } catch (error) {
+            console.error("Error processing leave action:", error);
+        }
     };
 
-    const updateSalaryStructure = (empId, base, allowances, deductions) => {
-        setEmployees(prev => {
-            return prev.map(emp => {
-                if (emp.empId === empId) {
-                    return {
-                        ...emp,
-                        salary: { base, allowances, deductions }
-                    };
-                }
-                return emp;
+    const updateSalaryStructure = async (empId, base, allowances, deductions) => {
+        try {
+            const token = sessionStorage.getItem("hrms_react_token");
+            if (!token) return;
+
+            const res = await fetch(`http://localhost:3000/api/payroll/${empId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ base, allowances, deductions })
             });
-        });
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                setEmployees(prev => {
+                    return prev.map(emp => {
+                        if (emp.empId === empId) {
+                            return {
+                                ...emp,
+                                salary: { base, allowances, deductions }
+                            };
+                        }
+                        return emp;
+                    });
+                });
+            }
+        } catch (error) {
+            console.error("Error updating salary structure:", error);
+        }
     };
 
     return (

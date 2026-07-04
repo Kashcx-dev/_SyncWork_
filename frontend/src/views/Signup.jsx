@@ -74,7 +74,7 @@ export default function Signup() {
                 </div>
 
                 {errors.global && (
-                    <div className="mb-4 p-4 text-sm bg-rose-50 text-rose-800 border border-rose-100 rounded-2xl dark:bg-neutral-950 dark:text-white dark:border-neutral-800">
+                    <div className="mb-4 p-4 text-sm bg-rose-50 text-rose-800 border border-rose-100 rounded-2xl dark:bg-neutral-950 dark:text-rose-400 dark:border-neutral-800">
                         {errors.global}
                     </div>
                 )}
@@ -93,7 +93,7 @@ export default function Signup() {
                                     placeholder="John Doe"
                                     className="w-full px-4 py-3 border border-slate-200 dark:border-neutral-800 rounded-xl bg-slate-50 dark:bg-neutral-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-black dark:focus:border-white transition-all"
                                 />
-                                {errors.name && <p className="mt-1 text-xs text-rose-600 dark:text-white">{errors.name}</p>}
+                                {errors.name && <p className="mt-1 text-xs text-rose-600 dark:text-rose-400">{errors.name}</p>}
                             </div>
 
                             <div>
@@ -107,7 +107,7 @@ export default function Signup() {
                                     placeholder="name@company.com"
                                     className="w-full px-4 py-3 border border-slate-200 dark:border-neutral-800 rounded-xl bg-slate-50 dark:bg-neutral-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-black dark:focus:border-white transition-all"
                                 />
-                                {errors.email && <p className="mt-1 text-xs text-rose-600 dark:text-white">{errors.email}</p>}
+                                {errors.email && <p className="mt-1 text-xs text-rose-600 dark:text-rose-400">{errors.email}</p>}
                             </div>
 
                             <div>
@@ -152,7 +152,7 @@ export default function Signup() {
                                     placeholder="••••••••"
                                     className="w-full px-4 py-3 border border-slate-200 dark:border-neutral-800 rounded-xl bg-slate-50 dark:bg-neutral-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-black dark:focus:border-white transition-all"
                                 />
-                                {errors.password && <p className="mt-1 text-xs text-rose-600 dark:text-white leading-relaxed">{errors.password}</p>}
+                                {errors.password && <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 leading-relaxed">{errors.password}</p>}
                             </div>
                         </>
                     ) : (
@@ -165,9 +165,9 @@ export default function Signup() {
                                 value={otp}
                                 onChange={(e) => setOtp(e.target.value)}
                                 placeholder="123456"
-                                className="w-full px-4 py-3 border border-slate-200 dark:border-neutral-800 rounded-xl bg-slate-50 dark:bg-neutral-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-black dark:focus:border-white transition-all"
+                                className="w-full px-4 py-3 border border-slate-200 dark:border-neutral-800 rounded-xl bg-slate-50 dark:bg-neutral-950 text-slate-900 dark:text-rose-400 text-sm focus:outline-none focus:border-black dark:focus:border-white transition-all"
                             />
-                            {errors.otp && <p className="mt-1 text-xs text-rose-600 dark:text-white">{errors.otp}</p>}
+                            {errors.otp && <p className="mt-1 text-xs text-rose-600 dark:text-rose-400">{errors.otp}</p>}
                         </div>
                     )}
 
