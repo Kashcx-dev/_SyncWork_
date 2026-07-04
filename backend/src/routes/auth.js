@@ -8,6 +8,7 @@ import sendEmail from '../../helper/mailer.js';
 const authRouter = Router();
 
 const otpMap = new Map();
+const signinOtpMap = new Map();
 
 function validatePassword(password) {
   if (password.length < 8) return false;
@@ -145,7 +146,7 @@ authRouter.post('/verify-otp', async (req, res) => {
 });
 
 
-// Sign In Route
+// Sign In Route (Step 1: Verify credentials and send OTP)
 authRouter.post('/signin', async (req, res) => {
     try {
         const { creds, password } = req.body;
@@ -174,7 +175,56 @@ authRouter.post('/signin', async (req, res) => {
             return res.status(401).json({ message: 'Invalid password' });
         }
 
-        // Generate JWT Token for security
+        // Generate OTP
+        const otp = crypto.randomInt(100000, 999999).toString();
+        const expiresAt = Date.now() + 5 * 60 * 1000;
+
+        signinOtpMap.set(user.email, { otp, expiresAt, user });
+
+        const options = {
+            from: '"SyncWork" <master.trainer049@gmail.com>',
+            to: user.email,
+            subject: "SyncWork Login Verification - Your OTP",
+            text: `Your verification OTP is: ${otp}. It expires in 5 minutes.`,
+            html: `<h3>SyncWork Login!</h3><p>Your verification code is: <strong>${otp}</strong></p><p>It expires in 5 minutes.</p>`
+        };
+
+        await sendEmail(options);
+
+        return res.status(200).json({ 
+            success: true, 
+            message: `Verification OTP sent to ${user.email}.`,
+            requires2FA: true,
+            email: user.email
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Verify Signin OTP Route (Step 2: Authenticate and log in user)
+authRouter.post('/verify-signin-otp', async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+        
+        const storedData = signinOtpMap.get(email);
+        if (!storedData) {
+            return res.status(400).json({ message: 'No OTP requested for this email or it expired.' });
+        }
+
+        if (Date.now() > storedData.expiresAt) {
+            signinOtpMap.delete(email); // Cleanup
+            return res.status(400).json({ message: 'OTP has expired.' });
+        }
+
+        if (storedData.otp !== otp) {
+            return res.status(400).json({ message: 'Invalid OTP.' });
+        }
+
+        const user = storedData.user;
+        signinOtpMap.delete(email);
+
         const token = jwt.sign(
             { id: user.id, role: user.role, email: user.email },
             process.env.JWT_SECRET,
