@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import { AppContext } from "../context/AppContext";
 import Modal from "../components/Modal";
+import noProfilePic from "../assets/no-profile-pic.png";
 
 export default function Profile() {
 	const { currentUser, updateProfile, profile } = useContext(AppContext);
@@ -14,16 +15,17 @@ export default function Profile() {
 		updateProfile(phone, address, avatar);
 		setIsModalOpen(false);
 	};
+	const displaySalary = profile?.baseSalary || 0;
 
 	return (
 		<div className="bg-white border border-slate-200 dark:bg-neutral-900 dark:border-neutral-800 rounded-2xl p-8 shadow-sm transition-all duration-200">
-			<div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pb-6 border-b border-slate-200 dark:border-neutral-800 mb-6 gap-4">
+			<div className="flex flex-col sm:flex-row justify-between pb-6 border-b border-slate-200 dark:border-neutral-800 mb-8 gap-4">
 				<div>
 					<h2 className="text-2xl font-bold text-slate-800 dark:text-white">
 						My Profile
 					</h2>
 					<p className="text-xs text-slate-400 dark:text-neutral-500 mt-1">
-						Review and manage your personal database records
+						Manage your personal contact info and profile image
 					</p>
 				</div>
 				<button
@@ -44,7 +46,7 @@ export default function Profile() {
 					<img
 						src={
 							currentUser.avatar ||
-							"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=120"
+							noProfilePic
 						}
 						alt="Avatar"
 						className="w-36 h-36 rounded-full object-cover border-4 border-slate-100 dark:border-neutral-800 shadow"

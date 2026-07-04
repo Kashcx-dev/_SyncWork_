@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { AppContext } from '../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, User, CalendarRange, MailCheck, Coins, Users, CalendarCheck2, MessageSquare } from 'lucide-react';
+import noProfilePic from '../assets/no-profile-pic.png';
 
 export default function Sidebar() {
     const { currentUser } = useContext(AppContext);
@@ -21,7 +22,7 @@ export default function Sidebar() {
             { id: 'chat', label: 'Secure Chat', icon: MessageSquare }
           ]
         : [
-            { id: 'dashboard', label: 'My Dashboard', icon: LayoutDashboard },
+            { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
             { id: 'profile', label: 'My Profile', icon: User },
             { id: 'attendance', label: 'Attendance', icon: CalendarRange },
             { id: 'leave', label: 'Time-off requests', icon: MailCheck },
@@ -33,7 +34,7 @@ export default function Sidebar() {
         <aside className="bg-white border border-slate-200 dark:bg-neutral-900 dark:border-neutral-800 rounded-2xl p-6 h-fit transition-colors duration-200">
             <div className="flex items-center gap-3 pb-5 border-b border-slate-200 dark:border-neutral-800 mb-5">
                 <img 
-                    src={currentUser.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&q=80&w=120"} 
+                    src={currentUser.avatar || noProfilePic} 
                     alt="Avatar" 
                     className="w-12 h-12 rounded-full object-cover border-2 border-black dark:border-white"
                 />

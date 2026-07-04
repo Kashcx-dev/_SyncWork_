@@ -2,6 +2,14 @@ import React, { useState, useContext } from 'react';
 import { AppContext } from '../context/AppContext';
 import { Link, useNavigate } from 'react-router-dom';
 
+const passwordRules = [
+    { key: 'length', text: 'Minimum 8 characters', test: (val) => val.length >= 8 },
+    { key: 'lowercase', text: 'At least one lowercase letter (a-z)', test: (val) => /[a-z]/.test(val) },
+    { key: 'uppercase', text: 'At least one uppercase letter (A-Z)', test: (val) => /[A-Z]/.test(val) },
+    { key: 'number', text: 'At least one number (0-9)', test: (val) => /[0-9]/.test(val) },
+    { key: 'special', text: 'At least one special character (e.g. !, @, #, $, %, ^, &, *)', test: (val) => /[!@#$%^&*(),.?":{}|<>]/.test(val) }
+];
+
 export default function Signup() {
     const { handleSignUp, handleVerifyOtp, handleFirstTimeCryptoSetup } = useContext(AppContext);
     const navigate = useNavigate();
@@ -22,7 +30,14 @@ export default function Signup() {
         const temp = {};
         if (!name.trim()) temp.name = "Full name is required";
         if (!email.trim()) temp.email = "Email is required";
-        if (!password) temp.password = "Password is required";
+        if (!password) {
+            temp.password = "Password is required";
+        } else {
+            const missing = passwordRules.filter(rule => !rule.test(password));
+            if (missing.length > 0) {
+                temp.password = "Password does not meet all security requirements";
+            }
+        }
         setErrors(temp);
         return Object.keys(temp).length === 0;
     };
@@ -153,7 +168,20 @@ export default function Signup() {
                                     placeholder="••••••••"
                                     className="w-full px-4 py-3 border border-slate-200 dark:border-neutral-800 rounded-xl bg-slate-50 dark:bg-neutral-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-black dark:focus:border-white transition-all"
                                 />
-                                {errors.password && <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 leading-relaxed">{errors.password}</p>}
+                                {errors.password && <p className="mt-1 text-xs text-rose-600 dark:text-rose-450 leading-relaxed font-bold">{errors.password}</p>}
+                                {password.length > 0 && passwordRules.filter(rule => !rule.test(password)).length > 0 && (
+                                    <div className="mt-3.5 space-y-1.5 bg-rose-50/5 dark:bg-rose-950/5 border border-slate-200 dark:border-neutral-800 rounded-xl p-4">
+                                        <p className="text-[10px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 mb-1">Missing Requirements:</p>
+                                        {passwordRules
+                                            .filter(rule => !rule.test(password))
+                                            .map(rule => (
+                                                <p key={rule.key} className="text-xs text-rose-600 dark:text-rose-400 font-semibold flex items-center gap-1.5">
+                                                    • {rule.text}
+                                                </p>
+                                            ))
+                                        }
+                                    </div>
+                                )}
                             </div>
                         </>
                     ) : (
