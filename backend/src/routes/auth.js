@@ -42,7 +42,7 @@ const getTimeAndDate = () => {
 // Sign Up Route (Step 1: Send OTP)
 authRouter.post('/signup', async (req, res) => {
     try {
-        const { name, email, password } = req.body;
+        const { name, email, password, role, department, designation } = req.body;
 
         if (!name || !email || !password) {
             return res.status(400).json({ message: 'Name, email and password are required' });
@@ -62,7 +62,15 @@ authRouter.post('/signup', async (req, res) => {
         const expiresAt = Date.now() + 5 * 60 * 1000; 
 
         // Store email mapping to otp and user details
-        otpMap.set(email, { otp, expiresAt, name, password });
+        otpMap.set(email, { 
+            otp, 
+            expiresAt, 
+            name, 
+            password, 
+            role: role === 'HR' ? 'HR' : 'EMPLOYEE',
+            department: department || 'Operations',
+            designation: designation || 'Associate'
+        });
 
         const options = {
             from: '"SyncWork" <master.trainer049@gmail.com>', // Ensure this matches your .env EMAIL_USER
@@ -106,7 +114,7 @@ authRouter.post('/verify-otp', async (req, res) => {
 
         const passwordHash = await Hash_Pass(storedData.password);
         
-        const employeeId = `EMP-${crypto.randomInt(100000, 999999)}`;
+        const employeeId = crypto.randomInt(100000000000, 999999999999).toString();
 
         const user = await prisma.user.create({
             data: {
@@ -114,8 +122,15 @@ authRouter.post('/verify-otp', async (req, res) => {
                 passwordHash,
                 displayName: storedData.name,
                 employeeId,
-                role: 'EMPLOYEE', // Default role on signup
-                status: 'ACTIVE'
+                role: storedData.role || 'EMPLOYEE', // Use the role they selected during signup
+                status: 'ACTIVE',
+                profile: {
+                    create: {
+                        department: storedData.department,
+                        designation: storedData.designation,
+                        baseSalary: 4500 // Default base salary
+                    }
+                }
             }
         });
 
@@ -135,6 +150,7 @@ authRouter.post('/verify-otp', async (req, res) => {
                 employeeId: user.employeeId,
                 displayName: user.displayName,
                 email: user.email,
+                role: user.role,
                 createdAt: getTimeAndDate()
             }
         });

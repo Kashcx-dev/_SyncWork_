@@ -10,6 +10,8 @@ export default function Signup() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [role, setRole] = useState('EMPLOYEE');
+    const [department, setDepartment] = useState('Operations');
     const [otp, setOtp] = useState('');
     
     const [otpSent, setOtpSent] = useState(false);
@@ -37,7 +39,7 @@ export default function Signup() {
 
         if (!otpSent) {
             if (!validateSignUp()) return;
-            const res = await handleSignUp({ name, email, password });
+            const res = await handleSignUp({ name, email, password, role, department });
             if (res.success) {
                 setOtpSent(true);
             } else {
@@ -101,6 +103,37 @@ export default function Signup() {
                                     className="w-full px-4 py-3 border border-slate-200 dark:border-neutral-800 rounded-xl bg-slate-50 dark:bg-neutral-950 text-slate-900 dark:text-white text-sm focus:outline-none focus:border-black dark:focus:border-white transition-all"
                                 />
                                 {errors.email && <p className="mt-1 text-xs text-rose-600 dark:text-white">{errors.email}</p>}
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-700 dark:text-neutral-300 uppercase tracking-wider mb-2">
+                                    Register As (Role)
+                                </label>
+                                <select
+                                    value={role}
+                                    onChange={(e) => setRole(e.target.value)}
+                                    className="w-full px-4 py-3 border border-slate-200 dark:border-neutral-800 rounded-xl bg-slate-50 dark:bg-neutral-950 text-slate-950 dark:text-white text-sm focus:outline-none focus:border-black dark:focus:border-white transition-all"
+                                >
+                                    <option value="EMPLOYEE">Employee (Regular)</option>
+                                    <option value="HR">HR / Admin</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-700 dark:text-neutral-300 uppercase tracking-wider mb-2">
+                                    Department
+                                </label>
+                                <select
+                                    value={department}
+                                    onChange={(e) => setDepartment(e.target.value)}
+                                    className="w-full px-4 py-3 border border-slate-200 dark:border-neutral-800 rounded-xl bg-slate-50 dark:bg-neutral-950 text-slate-950 dark:text-white text-sm focus:outline-none focus:border-black dark:focus:border-white transition-all"
+                                >
+                                    <option value="Operations">Operations</option>
+                                    <option value="Human Resources">Human Resources</option>
+                                    <option value="Engineering">Engineering</option>
+                                    <option value="Marketing">Marketing</option>
+                                    <option value="Finance">Finance</option>
+                                </select>
                             </div>
 
                             <div>

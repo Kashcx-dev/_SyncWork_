@@ -3,7 +3,7 @@ import { AppContext } from "../context/AppContext";
 import Modal from "../components/Modal";
 
 export default function Profile() {
-	const { currentUser, updateProfile } = useContext(AppContext);
+	const { currentUser, updateProfile, profile } = useContext(AppContext);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [phone, setPhone] = useState(currentUser.phone || "");
 	const [address, setAddress] = useState(currentUser.address || "");
@@ -119,6 +119,17 @@ export default function Profile() {
 								: "Not Available"}
 						</p>
 					</div>
+
+					{profile && profile.reportingTo && (
+						<div className="border-b border-slate-50 dark:border-neutral-800/40 pb-3 sm:col-span-2">
+							<label className="block text-[10px] font-bold text-slate-400 dark:text-neutral-500 uppercase tracking-wider mb-1">
+								Reporting Structure
+							</label>
+							<p className="text-base font-semibold text-slate-800 dark:text-neutral-200">
+								{profile.reportingTo}
+							</p>
+						</div>
+					)}
 				</div>
 			</div>
 

@@ -22,8 +22,11 @@ export default function DashboardOverview() {
 	return (
 		<div className="space-y-6">
 			<div className="bg-linear-to-r from-slate-100 to-slate-200/50 dark:from-neutral-900 dark:to-neutral-900/50 border border-slate-200 dark:border-neutral-800 rounded-2xl p-8 relative overflow-hidden transition-all">
-				<h1 className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight mb-2">
+				<h1 className="text-3xl font-extrabold text-slate-800 dark:text-white tracking-tight mb-2 flex items-center gap-3 flex-wrap">
 					Good Day, {currentUser.name}!
+					<span className="text-xs px-2.5 py-1 font-bold uppercase rounded-full bg-neutral-200/60 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200 border border-neutral-300 dark:border-neutral-700">
+						{currentUser.role}
+					</span>
 				</h1>
 				<p className="text-sm text-slate-600 dark:text-neutral-400">
 					{isHR

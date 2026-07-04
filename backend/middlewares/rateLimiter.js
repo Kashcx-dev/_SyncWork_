@@ -9,6 +9,8 @@ export const getRateLimiter = (type) => {
             message: { message: "Too many attempts. Please wait 10 minutes before trying again." },
             standardHeaders: true,
             legacyHeaders: false,
+            skipSuccessfulRequests: true, // Only count failed attempts towards the limit
+
         });
     }
 
