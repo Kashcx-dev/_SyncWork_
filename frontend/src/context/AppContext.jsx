@@ -271,6 +271,18 @@ export const AppProvider = ({ children }) => {
             const profileData = await profileRes.json();
             if (profileRes.ok && profileData.success) {
                 setProfile(profileData.profile);
+                setCurrentUser(prev => {
+                    if (!prev) return null;
+                    const next = {
+                        ...prev,
+                        name: profileData.profile.displayName,
+                        role: profileData.profile.role,
+                        avatar: profileData.profile.avatar || prev.avatar
+                    };
+                    sessionStorage.setItem("hrms_react_active_user", JSON.stringify(next));
+                    return next;
+                });
+                
                 if (profileData.profile.role === 'HR' || profileData.profile.role === 'ADMIN') {
                     await fetchEmployees(tokenToUse);
                 }
