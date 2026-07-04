@@ -81,7 +81,7 @@ model Attendance {
 model LeaveRequest {
   id             String       @id @default(uuid())
   userId         String
-  user           User         @relation("EmployeeLeaves", fields: [userId], references: [id])
+  user         User         @relation("EmployeeLeaves", fields: [userId], references: [id])
   leaveType      LeaveType
   startDate      DateTime     @db.Date
   endDate        DateTime     @db.Date
