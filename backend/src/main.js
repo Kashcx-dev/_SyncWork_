@@ -35,7 +35,7 @@ app.use((err, req, res, next) => {
     res.status(500).json({ message: 'Something went wrong on the server!' });
 });
 
-// ─── Socket.io Integration (Ported from InstaKG main.js) ───
+// ─── Socket.io Integration ───
 
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -45,7 +45,7 @@ const io = new Server(server, {
 const userSockets = new Map();
 const userStatuses = new Map();
 
-// Socket.io JWT Authentication Middleware (same as InstaKG)
+// Socket.io JWT Authentication Middleware
 io.use((socket, next) => {
     const token = socket.handshake.auth.token;
     if (!token) {
@@ -74,7 +74,7 @@ io.on("connection", async (socket) => {
     // Send all current statuses to this new user
     socket.emit("initial_statuses", Object.fromEntries(userStatuses));
 
-    // Auto-join all conversation rooms for this user (same pattern as InstaKG)
+    // Auto-join all conversation rooms for this user
     try {
         const participations = await prisma.conversationParticipant.findMany({
             where: { userId },
@@ -105,7 +105,7 @@ io.on("connection", async (socket) => {
     });
 });
 
-// Make io and userSockets accessible from route handlers (same as InstaKG)
+// Make io and userSockets accessible from route handlers
 app.set("socketio", io);
 app.set("userSockets", userSockets);
 

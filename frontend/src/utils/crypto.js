@@ -1,4 +1,4 @@
-// ─── SyncWork Crypto Engine (Ported from InstaKG) ───
+// ─── SyncWork Crypto Engine ───
 // Uses a custom C++ WebAssembly binary for Diffie-Hellman modular exponentiation
 // and Web Crypto API (AES-256-GCM) for message encryption/decryption
 
