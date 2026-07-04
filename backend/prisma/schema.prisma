@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  EMPLOYEE
+  ADMIN
+  HR
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  HALF_DAY
+  LEAVE
+}
+
+enum LeaveType {
+  PAID
+  SICK
+  UNPAID
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id              String           @id @default(uuid())
+  employeeId      String           @unique
+  email           String           @unique
+  passwordHash    String
+  displayName     String
+  role            Role             @default(EMPLOYEE)
+  status          Status           @default(ACTIVE)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  // E2E Encryption Key Vault
+  publicKey            String?
+  encryptedPrivateKey  String?
+  keySalt              String?
+  keyIv                String?
+
+  profile         EmployeeProfile?
+  attendance      Attendance[]
+  leaveRequests   LeaveRequest[]   @relation("EmployeeLeaves")
+  approvedLeaves  LeaveRequest[]   @relation("AdminApprovedLeaves")
+  payroll         Payroll[]
+
+  // Chat relations
+  conversationParticipants ConversationParticipant[]
+  sentMessages             Message[]
+}
+
+model EmployeeProfile {
+  id                String    @id @default(uuid())
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id])
+  phone             String?
+  address           String?
+  profilePictureUrl String?
+  department        String?
+  designation       String?
+  joinDate          DateTime? @db.Date
+  baseSalary        Float?
+  allowances        Float?    @default(0)
+  deductions        Float?    @default(0)
+}
+
+model Attendance {
+  id           String           @id @default(uuid())
+  userId       String
+  user         User             @relation(fields: [userId], references: [id])
+  date         DateTime         @db.Date
+  checkInTime  DateTime
+  checkOutTime DateTime?
+  status       AttendanceStatus
+}
+
+model LeaveRequest {
+  id             String       @id @default(uuid())
+  userId         String
+  user         User         @relation("EmployeeLeaves", fields: [userId], references: [id])
+  leaveType      LeaveType
+  startDate      DateTime     @db.Date
+  endDate        DateTime     @db.Date
+  remarks        String?
+  status         LeaveStatus  @default(PENDING)
+  approvedById   String?
+  approvedBy     User?        @relation("AdminApprovedLeaves", fields: [approvedById], references: [id])
+  adminComments  String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Payroll {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  month       Int
+  year        Int
+  baseSalary  Float
+  deductions  Float    @default(0)
+  netSalary   Float
+  isPaid      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ─── Chat System ───
+
+model Conversation {
+  id           String   @id @default(uuid())
+  createdAt    BigInt
+
+  participants ConversationParticipant[]
+  messages     Message[]
+}
+
+model ConversationParticipant {
+  conversationId    String
+  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId            String
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lastReadMessageId Int          @default(0)
+
+  @@id([conversationId, userId])
+}
+
+model Message {
+  id              Int          @id @default(autoincrement())
+  conversationId  String
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId        String
+  sender          User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  message         String
+  timestamp       BigInt
+
+  @@index([conversationId, timestamp])
+}
