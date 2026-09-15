@@ -2,6 +2,7 @@
   
 # SyncWork
 **Next-Generation Human Resource Management System (HRMS)**
+**(ODOO HACKATHON)**
 
 [![React](https://img.shields.io/badge/React-18.2.0-blue.svg?style=for-the-badge&logo=react)](https://reactjs.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18.x-green.svg?style=for-the-badge&logo=nodedotjs)](https://nodejs.org/)
